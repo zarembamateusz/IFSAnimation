@@ -25,17 +25,20 @@ const offsetX = 0;
 const offsetY = -2;
 const offsetZ = 0;
 
+const transition = true;
 const number = 10000;
 
 const spheres = [];
 const frames = 250;
 let currentFrame = 0;
 
+
+let drawn = false;
 const addSphere = (x = 0, y = 0, z = 0, color = 0xffffff) => {
     const geometry = new THREE.CubeGeometry(0.01, 0.01, 0.01);
 
 
-    const material = new THREE.MeshBasicMaterial({color: `rgb(${Math.floor(Math.abs(x)/1.0*255)}, ${Math.floor(Math.abs(y)/4.0*255)}, ${Math.floor(Math.abs(z)/1.0*255)})`});
+    const material = new THREE.MeshBasicMaterial({color: `rgb(${Math.floor(Math.abs(x) / 1.0 * 255)}, ${Math.floor(Math.abs(y) / 4.0 * 255)}, ${Math.floor(Math.abs(z) / 1.0 * 255)})`});
     // const material = new THREE.MeshBasicMaterial({color});
     const sphere = new THREE.Mesh(geometry, material);
 
@@ -61,28 +64,30 @@ const arrangeSpheres = (x, y, z) => {
             spheres[i].position.x = x[i] + offsetX;
             spheres[i].position.y = y[i] + offsetY;
             spheres[i].position.z = z[i] + offsetZ;
-            spheres[i].material.color = new THREE.Color(`rgb(${Math.floor(Math.abs(x[i])/1.0*255)}, ${Math.floor(Math.abs(y[i])/4.0*255)}, ${Math.floor(Math.abs(z[i])/1.0*255)})`)
+            spheres[i].material.color = new THREE.Color(`rgb(${Math.floor(Math.abs(x[i]) / 1.0 * 255)}, ${Math.floor(Math.abs(y[i]) / 4.0 * 255)}, ${Math.floor(Math.abs(z[i]) / 1.0 * 255)})`)
         }
     }
 }
 
 
 let keyframe1 = [];
-keyframe1.push({
-        a: 0,
-        b: 0,
-        c: 0.01,
-        d: 0,
-        e: 0.26,
-        f: 0.0,
-        g: 0.0,
-        h: 0.0,
-        i: 0.5,
-        j: 0.0,
-        k: 0.0,
-        l: 0.0,
-        p: 0.01
-    },
+let keyframe2 = [];
+
+const fern1 = [{
+    a: 0,
+    b: 0,
+    c: 0.01,
+    d: 0,
+    e: 0.26,
+    f: 0.0,
+    g: 0.0,
+    h: 0.0,
+    i: 0.5,
+    j: 0.0,
+    k: 0.0,
+    l: 0.0,
+    p: 0.01
+},
     {
         a: 0.2,
         b: -0.26,
@@ -127,24 +132,23 @@ keyframe1.push({
         k: 0.80,
         l: 0.0,
         p: 0.89
-    })
+    }]
 
-let keyframe2 = [];
-keyframe2.push({
-        a: 0.05,
-        b: -0.0,
-        c: -0.0,
-        d: 0,
-        e: 0.6,
-        f: 0.0,
-        g: -0.0,
-        h: -0.0,
-        i: 0.05,
-        j: 0.0,
-        k: 0.0,
-        l: 0.0,
-        p: 0.01
-    },
+const fern2 = [{
+    a: 0.05,
+    b: -0.0,
+    c: -0.0,
+    d: 0,
+    e: 0.6,
+    f: 0.0,
+    g: -0.0,
+    h: -0.0,
+    i: 0.05,
+    j: 0.0,
+    k: 0.0,
+    l: 0.0,
+    p: 0.01
+},
     {
         a: 0.45,
         b: -0.22,
@@ -189,7 +193,122 @@ keyframe2.push({
         k: 2.00,
         l: 0.0,
         p: 0.39
+    }]
+
+const sierpinskiGasket = [
+    {
+        a: 0.5,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0.5,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0.5,
+        j: 0,
+        k: 0,
+        l: 0,
+        p: 0.2
+    },
+    {
+        a: 0.5,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0.5,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0.5,
+        j: 0,
+        k: 0,
+        l: 0.5,
+        p: 0.2
+    },
+    {
+        a: 0.5,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0.5,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0.5,
+        j: 0.5,
+        k: 0,
+        l: 0.5,
+        p: 0.2
+    },
+    {
+        a: 0.5,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0.5,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0.5,
+        j: 0,
+        k: 0,
+        l: 0.5,
+        p: 0.2
+    },
+    {
+        a: 0.5,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0.5,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0.5,
+        j: 0.25,
+        k: 0.5,
+        l: 0.25,
+        p: 0.2
+    }
+]
+
+keyframe1.push(...sierpinskiGasket)
+keyframe2.push(...fern1)
+
+if (keyframe1.length < keyframe2.length) {
+    keyframe1.push({
+        a: 0,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0,
+        j: 0,
+        k: 0,
+        l: 0,
+        p: 0
     })
+} else if (keyframe2.length < keyframe1.length) {
+    keyframe2.push({
+        a: 0,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0,
+        f: 0,
+        g: 0,
+        h: 0,
+        i: 0,
+        j: 0,
+        k: 0,
+        l: 0,
+        p: 0
+    })
+}
 
 
 const createFractalFromEquations = (equations) => {
@@ -247,15 +366,16 @@ const renderFrame = () => {
 
         }
     }
+    if (transition || !drawn) {
+        drawn = true;
+        createFractalFromEquations(currentKeyframe)
+        currentFrame++;
+        if (currentFrame > frames) {
+            currentFrame = 0;
+        }
 
-    createFractalFromEquations(currentKeyframe)
-
-    currentFrame++;
-    if (currentFrame > frames) {
-        currentFrame = 0;
     }
 }
-
 
 
 window.addEventListener('resize', onWindowResize, false);
@@ -272,6 +392,7 @@ function onWindowResize() {
 function animate() {
     controls.update();
     renderFrame();
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
